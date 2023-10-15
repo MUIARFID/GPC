@@ -35,7 +35,7 @@ function init() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.getElementById('container').appendChild(renderer.domElement);
     renderer.setClearColor(new THREE.Color(0,0,0.7)); 
-    renderer.autoClear = false; // a false, para que no borre el render anterior
+    renderer.autoClear = false;
 
 
     // Escena
