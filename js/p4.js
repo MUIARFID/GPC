@@ -141,13 +141,63 @@ function loadScene() {
     //PINZA
     const pinza = new THREE.Object3D();
     //TODO: crear geometria correctamente
-    
+
     const f1 = new THREE.Mesh(new THREE.BoxGeometry(19, 20, 4), material)
     f1.position.set(9.5, 0, 0);
     pinza.add(f1);
 
-    const f2 = new THREE.Mesh(new THREE.BoxGeometry(19, 20, 2), material);
-    f2.position.set(19 + 9.5, 0, 0);
+    const geometry = new THREE.BufferGeometry();
+    const vertices = new Float32Array( [
+        // outer
+        9.0, -6.0,  0.0,
+        9.0,  6.0,  0.0, 
+        -9.0, -10.0,  2.0, 
+    
+        9.0,  6.0,  0.0,
+        -9.0,  10.0,  2.0,
+        -9.0, -10.0,  2.0, 
+
+        // inner
+        9.0,  6.0,  -2.0, 
+        9.0, -6.0,  -2.0, 
+        -9.0, -10.0, -2.0, 
+
+        -9.0, -10.0,  -2.0,
+        -9.0,  10.0,  -2.0,
+        9.0,  6.0,  -2.0,
+
+        // top
+        9.0,  6.0,  0.0,
+        9.0,  6.0,  -2.0,
+        -9.0,  10.0,  -2.0,
+
+        -9.0,  10.0,  -2.0,
+        -9.0,  10.0,  2.0,
+        9.0,  6.0,  0.0,
+
+        // bottom
+        -9.0,  -10.0,  -2.0,
+        9.0,  -6.0,  -2.0,
+        9.0,  -6.0,  0.0,
+
+        9.0,  -6.0,  0.0,
+        -9.0,  -10.0,  2.0,
+        -9.0,  -10.0,  -2.0,
+
+        // front
+        9.0,  6.0,  -2.0,
+        9.0,  6.0,  0.0,
+        9.0,  -6.0,  0.0,
+
+        9.0,  -6.0,  0.0,
+        9.0,  -6.0,  -2.0,
+        9.0,  6.0,  -2.0,
+    ] );
+
+    geometry.setAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
+    geometry.computeVertexNormals();
+    const f2 = new THREE.Mesh(geometry, material);
+    f2.position.set(19 + 9, 0, 0);
     pinza.add(f2);
 
 
@@ -161,8 +211,9 @@ function loadScene() {
     pinzaIzq = pinza.clone();
     pinzaIzq.position.set(0, 0, 15);
     mano.add(pinzaIzq);
-
+    
     pinzaDer = pinza.clone();
+    pinzaDer.scale.z = -1;
     pinzaDer.position.set(0, 0, -15);
     mano.add(pinzaDer);
 
