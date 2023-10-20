@@ -10,13 +10,13 @@
 import * as THREE from '../../lib/three.module.js'
 import {OrbitControls} from '../lib/OrbitControls.module.js'
 import {GLTFLoader} from '../lib/GLTFLoader.module.js'
-import loadModel from './helpers.js'
+import {loadRoad} from './helpers.js'
 
 // Variables de consenso
 let renderer, scene, camera;
 
 // Variables globales
-let robot, cameraControls;
+let cameraControls;
 
 // Camaras adicionales
 let minimap;
@@ -40,9 +40,9 @@ function init() {
 
     // Camara
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000);
-    camera.position.set(15, 15, 15);
+    camera.position.set(5, 5, 5);
     cameraControls = new OrbitControls(camera, renderer.domElement);
-    cameraControls.minDistance = 5;
+    cameraControls.minDistance = 1;
     cameraControls.maxDistance = 500;
 
     // Camaras adicionales
@@ -71,23 +71,11 @@ function updateAspectRatio(){
 function loadScene() {
     let material = new THREE.MeshNormalMaterial();
 
-    // Importar modelo GLTF
-    // const loaderGLTF = new GLTFLoader();
-    // loaderGLTF.load("../models/proyecto/buildings/low_buildingE.glb",
-    //     function (gltf) {
-    //         scene.add(gltf.scene);
-    //         console.log(gltf);
-    //         for(let node of gltf.scene.children){
-    //             console.log(node);
-    //             for(let mesh of node.children){
-    //                 console.log(mesh);8½¾t.¥’00
-    //                 mesh.material.metalness = 0;
-    //             }
-    //         }
-    //     }
-    // );
-
-    loadModel("../models/proyecto/buildings/low_buildingE.glb", (asd) => { scene.add(asd) });
+    // loadModel("../models/proyecto/roads/road_bend.glb", scene, [-0.50,0,-0.25],[0,0,0]);    
+    loadRoad("bend", scene)
+    // .then((road) => {
+    //         scene.add(road);
+    //     });
 
     // Suelo
     const suelo = new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000, 10, 10), material);
@@ -101,7 +89,7 @@ function loadScene() {
     hemiLight.position.set( 0, 300, 0 );
     scene.add( hemiLight );
     
-    var dirLight = new THREE.DirectionalLight( 0xffffff );
+    var dirLight = new THREE.DirectionalLight( 0x999999 );
     dirLight.position.set( 75, 300, -75 );
     scene.add( dirLight );
 
