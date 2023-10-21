@@ -7,7 +7,7 @@
 */
 
 // Modulos necesarios
-import * as THREE from '../../lib/three.module.js'
+import * as THREE from '../lib/three.module.js'
 import {OrbitControls} from '../lib/OrbitControls.module.js'
 import {GUI} from '../lib/lil-gui.module.min.js'
 import {TWEEN} from '../lib/tween.module.min.js'
