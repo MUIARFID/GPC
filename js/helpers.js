@@ -1,5 +1,5 @@
 import {GLTFLoader} from '../lib/GLTFLoader.module.js'
-export default
+import * as THREE from '../../lib/three.module.js'
 
 function loadModel(path, scene) {
     const loaderGLTF = new GLTFLoader();

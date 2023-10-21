@@ -10,13 +10,13 @@
 import * as THREE from '../../lib/three.module.js'
 import {OrbitControls} from '../lib/OrbitControls.module.js'
 import {GLTFLoader} from '../lib/GLTFLoader.module.js'
-import loadModel from './helpers.js'
+import {loadRoad} from './helpers.js'
 
 // Variables de consenso
 let renderer, scene, camera;
 
 // Variables globales
-let robot, cameraControls;
+let cameraControls;
 
 // Camaras adicionales
 let minimap;
@@ -40,9 +40,9 @@ function init() {
 
     // Camara
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000);
-    camera.position.set(15, 15, 15);
+    camera.position.set(5, 5, 5);
     cameraControls = new OrbitControls(camera, renderer.domElement);
-    cameraControls.minDistance = 5;
+    cameraControls.minDistance = 1;
     cameraControls.maxDistance = 500;
 
     // Camaras adicionales
@@ -107,7 +107,7 @@ async function loadScene() {
     hemiLight.position.set( 0, 300, 0 );
     scene.add( hemiLight );
     
-    var dirLight = new THREE.DirectionalLight( 0xffffff );
+    var dirLight = new THREE.DirectionalLight( 0x999999 );
     dirLight.position.set( 75, 300, -75 );
     scene.add( dirLight );
 
