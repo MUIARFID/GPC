@@ -68,7 +68,7 @@ function updateAspectRatio(){
 
 }
 
-function loadScene() {
+async function loadScene() {
     let material = new THREE.MeshNormalMaterial();
 
     // Importar modelo GLTF
@@ -87,7 +87,13 @@ function loadScene() {
     //     }
     // );
 
-    loadModel("../models/proyecto/buildings/low_buildingE.glb", (asd) => { scene.add(asd) });
+    loadModel("../models/proyecto/buildings/low_buildingE.glb", scene);
+
+    let m1 = scene.getObjectByName("asd")
+    // let m2 = m1.clone()
+    // m2.position.x = 20
+    console.log(m1);
+
 
     // Suelo
     const suelo = new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000, 10, 10), material);

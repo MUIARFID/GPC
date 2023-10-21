@@ -6,6 +6,8 @@
  * @author <miedgo@upv.es>,2023
 */
 
+//TODO: pinza sin solaparse
+
 // Modulos necesarios
 import * as THREE from '../../lib/three.module.js'
 import {OrbitControls} from '../lib/OrbitControls.module.js'
