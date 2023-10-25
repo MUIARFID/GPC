@@ -20,6 +20,15 @@ let renderer, scene, camera;
 let pinzaIzq, pinzaDer, mano, antebrazo, brazo, base;
 let robot, cameraControls;
 
+let robotControls = {
+    giroBase: 0,
+    giroBrazo: 0,
+    giroAntebrazoY: 0,
+    giroAntebrazoZ: 0,
+    giroPinza: 0,
+    separacionPinza: 15,
+    wireframe: false,
+    animacion: () => tween1.start() };
 
 function updateArm(anim) {
     robot.rotation.y = anim.giroBase * (Math.PI / 180);
@@ -29,6 +38,13 @@ function updateArm(anim) {
     mano.rotation.z = anim.giroPinza * (Math.PI / 180);
     pinzaIzq.position.z = anim.separacionPinza + 2;
     pinzaDer.position.z = -anim.separacionPinza - 2;
+
+    robotControls.giroBase = anim.giroBase;
+    robotControls.giroBrazo = anim.giroBrazo;
+    robotControls.giroAntebrazoY = anim.giroAntebrazoY;
+    robotControls.giroAntebrazoZ = anim.giroAntebrazoZ;
+    robotControls.giroPinza = anim.giroPinza;
+    robotControls.separacionPinza = anim.separacionPinza;
 }
 
 let animationData = {giroBase: 0, giroBrazo: 0, giroAntebrazoY: 0, giroAntebrazoZ: 0, giroPinza: 0, separacionPinza: 15}
@@ -75,15 +91,7 @@ tween4.chain(tween5);
 tween5.chain(tween6);
 tween6.chain(tween7);
 
-let robotControls = {
-    giroBase: 0,
-    giroBrazo: 0,
-    giroAntebrazoY: 0,
-    giroAntebrazoZ: 0,
-    giroPinza: 0,
-    separacionPinza: 15,
-    wireframe: false,
-    animacion: () => tween1.start() };
+
 
 // Camaras adicionales
 let minimap;
@@ -115,7 +123,7 @@ function init() {
     cameraControls.minDistance = 200;
     cameraControls.maxDistance = 500;
 
-    //Luces 
+    // Luces 
     // Luz ambiental
     const ambiental = new THREE.AmbientLight(0xFFFFFF, 0.2);
     scene.add(ambiental);
@@ -178,25 +186,25 @@ function initGui() {
     
     const robotFolder  = gui.addFolder("Control robot");
     robotFolder.add(robotControls, "giroBase", -180, 180, 1).name("Giro Base")
-        .onChange((value) => robot.rotation.y = value * (Math.PI / 180));
+        .onChange((value) => robot.rotation.y = value * (Math.PI / 180)).listen();
 
     robotFolder.add(robotControls, "giroBrazo", -45, 45, 1).name("Giro Brazo")
-        .onChange((value) => brazo.rotation.z = value * (Math.PI / 180));
+        .onChange((value) => brazo.rotation.z = value * (Math.PI / 180)).listen();
 
     robotFolder.add(robotControls, "giroAntebrazoY", -180, 180, 1).name("Giro Antebrazo Y")
-        .onChange((value) => antebrazo.rotation.y = value * (Math.PI / 180));
+        .onChange((value) => antebrazo.rotation.y = value * (Math.PI / 180)).listen();
 
     robotFolder.add(robotControls, "giroAntebrazoZ", -90, 90, 1).name("Giro Antebrazo Z")
-        .onChange((value) => antebrazo.rotation.z = value * (Math.PI / 180));
+        .onChange((value) => antebrazo.rotation.z = value * (Math.PI / 180)).listen();
 
     robotFolder.add(robotControls, "giroPinza", -40, 220, 1).name("Giro Pinza")
-        .onChange((value) => mano.rotation.z = value * (Math.PI / 180));
+        .onChange((value) => mano.rotation.z = value * (Math.PI / 180)).listen();
 
     robotFolder.add(robotControls, "separacionPinza", 0, 15, 1).name("Separacion Pinza")
         .onChange((value) => {
             pinzaIzq.position.z = value +2;
             pinzaDer.position.z = -value -2;
-        });
+        }).listen();
 
     robotFolder.add(robotControls, "wireframe").name("Wireframe")
         .onChange((value) => {
@@ -407,8 +415,10 @@ function loadScene() {
 
     //make all objects project shadows
     scene.traverseVisible(function(obj) {
-        obj.castShadow = true;
-        obj.receiveShadow = true;
+        if (obj instanceof THREE.Mesh) {
+            obj.castShadow = true;
+            obj.receiveShadow = true;
+        }
     });
 }
 
