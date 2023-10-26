@@ -7,7 +7,7 @@
 */
 
 // Modulos necesarios
-import * as THREE from '../../lib/three.module.js'
+import * as THREE from '../lib/three.module.js'
 
 // Variables de consenso
 let renderer, scene, camera;

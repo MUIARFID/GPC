@@ -7,7 +7,7 @@
 */
 
 // Modulos necesarios
-import * as THREE from '../../lib/three.module.js'
+import * as THREE from '../lib/three.module.js'
 import {OrbitControls} from '../lib/OrbitControls.module.js'
 
 // Variables de consenso
