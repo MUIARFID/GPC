@@ -31,14 +31,6 @@ let robotControls = {
     animacion: () => tween1.start() };
 
 function updateArm(anim) {
-    robot.rotation.y = anim.giroBase * (Math.PI / 180);
-    brazo.rotation.z = anim.giroBrazo * (Math.PI / 180);
-    antebrazo.rotation.y = anim.giroAntebrazoY * (Math.PI / 180);
-    antebrazo.rotation.z = anim.giroAntebrazoZ * (Math.PI / 180);
-    mano.rotation.z = anim.giroPinza * (Math.PI / 180);
-    pinzaIzq.position.z = anim.separacionPinza + 2;
-    pinzaDer.position.z = -anim.separacionPinza - 2;
-
     robotControls.giroBase = anim.giroBase;
     robotControls.giroBrazo = anim.giroBrazo;
     robotControls.giroAntebrazoY = anim.giroAntebrazoY;
@@ -166,16 +158,16 @@ function onKeyDown(event) {
     // move robot with arrows
     switch (event.key) {
         case "ArrowLeft":
-            robot.position.x -= 10;
+            robot.position.x -= 3;
             break;
         case "ArrowRight":
-            robot.position.x += 10;
+            robot.position.x += 3;
             break;
         case "ArrowUp":
-            robot.position.z -= 10;
+            robot.position.z -= 3;
             break;
         case "ArrowDown":
-            robot.position.z += 10;
+            robot.position.z += 3;
             break;
     }
 }
@@ -186,25 +178,22 @@ function initGui() {
     
     const robotFolder  = gui.addFolder("Control robot");
     robotFolder.add(robotControls, "giroBase", -180, 180, 1).name("Giro Base")
-        .onChange((value) => robot.rotation.y = value * (Math.PI / 180)).listen();
+        .onChange((value) => robotControls.giroBase = value).listen();
 
     robotFolder.add(robotControls, "giroBrazo", -45, 45, 1).name("Giro Brazo")
-        .onChange((value) => brazo.rotation.z = value * (Math.PI / 180)).listen();
+        .onChange((value) => robotControls.giroBrazo = value).listen();
 
     robotFolder.add(robotControls, "giroAntebrazoY", -180, 180, 1).name("Giro Antebrazo Y")
-        .onChange((value) => antebrazo.rotation.y = value * (Math.PI / 180)).listen();
+        .onChange((value) => robotControls.giroAntebrazoY = value).listen();
 
     robotFolder.add(robotControls, "giroAntebrazoZ", -90, 90, 1).name("Giro Antebrazo Z")
-        .onChange((value) => antebrazo.rotation.z = value * (Math.PI / 180)).listen();
+        .onChange((value) => robotControls.giroAntebrazoZ = value).listen();
 
     robotFolder.add(robotControls, "giroPinza", -40, 220, 1).name("Giro Pinza")
-        .onChange((value) => mano.rotation.z = value * (Math.PI / 180)).listen();
+        .onChange((value) => robotControls.giroPinza = value).listen();
 
     robotFolder.add(robotControls, "separacionPinza", 0, 15, 1).name("Separacion Pinza")
-        .onChange((value) => {
-            pinzaIzq.position.z = value +2;
-            pinzaDer.position.z = -value -2;
-        }).listen();
+        .onChange((value) => { robotControls.separacionPinza = value; }).listen();
 
     robotFolder.add(robotControls, "wireframe").name("Wireframe")
         .onChange((value) => {
@@ -312,8 +301,56 @@ function loadScene() {
         9.0,  6.0,  -2.0,
     ] );
 
+    const uvs = new Float32Array( [
+        // outer
+        0.0, 0.0,
+        0.0, 1.0, 
+        1.0, 0.0, 
+    
+        0.0, 1.0,
+        1.0, 1.0,
+        1.0, 0.0, 
+
+        // inner
+        0.0, 1.0, 
+        0.0, 0.0, 
+        1.0, 0.0, 
+
+        1.0, 0.0,
+        1.0, 1.0,
+        0.0, 1.0,
+
+        // top
+        0.0, 0.0,
+        0.0, 1.0,
+        1.0, 1.0,
+
+        1.0, 1.0,
+        1.0, 0.0,
+        0.0, 0.0,
+
+        // bottom
+        0.0, 0.0,
+        0.0, 1.0,
+        1.0, 1.0,
+        
+        1.0, 1.0,
+        1.0, 0.0,
+        0.0, 0.0,
+
+        // front
+        0.0, 0.0,
+        0.0, 1.0,
+        1.0, 1.0,
+
+        1.0, 1.0,
+        1.0, 0.0,
+        0.0, 0.0,
+    ] )
+
     geometry.setAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
     geometry.computeVertexNormals();
+    geometry.setAttribute( 'uv', new THREE.BufferAttribute( uvs, 2 ) );
     const f2 = new THREE.Mesh(geometry, metalMaterial);
     f2.position.set(19 + 9, 0, 0);
     pinza.add(f2);
@@ -424,6 +461,14 @@ function loadScene() {
 
 
 function update() {
+    robot.rotation.y = robotControls.giroBase * (Math.PI / 180);
+    brazo.rotation.z = robotControls.giroBrazo * (Math.PI / 180);
+    antebrazo.rotation.y = robotControls.giroAntebrazoY * (Math.PI / 180);
+    antebrazo.rotation.z = robotControls.giroAntebrazoZ * (Math.PI / 180);
+    mano.rotation.z = robotControls.giroPinza * (Math.PI / 180);
+    pinzaIzq.position.z = robotControls.separacionPinza + 2;
+    pinzaDer.position.z = -robotControls.separacionPinza - 2;
+
     TWEEN.update();
 }
 
