@@ -54,6 +54,7 @@ function setMinimapCamera() {
     //TODO: por que el brazo en mi camara apunta hacia la derecha??
     minimap = new THREE.OrthographicCamera(-L, L, L, -L, -1, 1000);
     minimap.position.set(0, 300, 0);
+    minimap.up = new THREE.Vector3(1, 0, 0);
     minimap.lookAt(0, 0, 0);
 }
 
@@ -72,15 +73,113 @@ function loadScene() {
     material = normalMaterial;
 
     //PINZA
+    //PINZA
     const pinza = new THREE.Object3D();
-    //TODO: crear geometria correctamente
-    
-    const f1 = new THREE.Mesh(new THREE.BoxGeometry(19, 20, 4), material)
+    const f1 = new THREE.Mesh(new THREE.BoxGeometry(19, 20, 4), normalMaterial)
     f1.position.set(9.5, 0, 0);
     pinza.add(f1);
 
-    const f2 = new THREE.Mesh(new THREE.BoxGeometry(19, 20, 2), material);
-    f2.position.set(19 + 9.5, 0, 0);
+    const geometry = new THREE.BufferGeometry();
+    const vertices = new Float32Array( [
+        // outer
+        9.0, -6.0,  0.0,
+        9.0,  6.0,  0.0, 
+        -9.0, -10.0,  2.0, 
+    
+        9.0,  6.0,  0.0,
+        -9.0,  10.0,  2.0,
+        -9.0, -10.0,  2.0, 
+
+        // inner
+        9.0,  6.0,  -2.0, 
+        9.0, -6.0,  -2.0, 
+        -9.0, -10.0, -2.0, 
+
+        -9.0, -10.0,  -2.0,
+        -9.0,  10.0,  -2.0,
+        9.0,  6.0,  -2.0,
+
+        // top
+        9.0,  6.0,  0.0,
+        9.0,  6.0,  -2.0,
+        -9.0,  10.0,  -2.0,
+
+        -9.0,  10.0,  -2.0,
+        -9.0,  10.0,  2.0,
+        9.0,  6.0,  0.0,
+
+        // bottom
+        -9.0,  -10.0,  -2.0,
+        9.0,  -6.0,  -2.0,
+        9.0,  -6.0,  0.0,
+
+        9.0,  -6.0,  0.0,
+        -9.0,  -10.0,  2.0,
+        -9.0,  -10.0,  -2.0,
+
+        // front
+        9.0,  6.0,  -2.0,
+        9.0,  6.0,  0.0,
+        9.0,  -6.0,  0.0,
+
+        9.0,  -6.0,  0.0,
+        9.0,  -6.0,  -2.0,
+        9.0,  6.0,  -2.0,
+    ] );
+
+    const uvs = new Float32Array( [
+        // outer
+        0.0, 0.0,
+        0.0, 1.0, 
+        1.0, 0.0, 
+    
+        0.0, 1.0,
+        1.0, 1.0,
+        1.0, 0.0, 
+
+        // inner
+        0.0, 1.0, 
+        0.0, 0.0, 
+        1.0, 0.0, 
+
+        1.0, 0.0,
+        1.0, 1.0,
+        0.0, 1.0,
+
+        // top
+        0.0, 0.0,
+        0.0, 1.0,
+        1.0, 1.0,
+
+        1.0, 1.0,
+        1.0, 0.0,
+        0.0, 0.0,
+
+        // bottom
+        0.0, 0.0,
+        0.0, 1.0,
+        1.0, 1.0,
+        
+        1.0, 1.0,
+        1.0, 0.0,
+        0.0, 0.0,
+
+        // front
+        0.0, 0.0,
+        0.0, 1.0,
+        1.0, 1.0,
+
+        1.0, 1.0,
+        1.0, 0.0,
+        0.0, 0.0,
+    ] )
+
+    geometry.setAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
+    geometry.computeVertexNormals();
+    geometry.setAttribute( 'uv', new THREE.BufferAttribute( uvs, 2 ) );
+    const f2 = new THREE.Mesh(geometry, normalMaterial);
+
+    f2.position.set(19 + 9, 0, 0);
     pinza.add(f2);
 
 

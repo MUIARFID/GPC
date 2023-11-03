@@ -6,18 +6,20 @@
  * @author <miedgo@upv.es>,2023
 */
 
-//TODO: pinza sin solaparse
-
 // Modulos necesarios
 import * as THREE from '../lib/three.module.js'
 import {OrbitControls} from '../lib/OrbitControls.module.js'
 import {GUI} from '../lib/lil-gui.module.min.js'
+import {TWEEN} from '../lib/tween.module.min.js'
 
 // Variables de consenso
 let renderer, scene, camera;
 
-// Variables globales
-let robot, cameraControls, material;
+// Globales
+//TODO: esto me parece una chapuza, pero no se me ocurre otra forma de hacerlo
+let pinzaIzq, pinzaDer, mano, antebrazo, brazo, base;
+let robot, cameraControls;
+
 let robotControls = {
     giroBase: 0,
     giroBrazo: 0,
@@ -25,16 +27,67 @@ let robotControls = {
     giroAntebrazoZ: 0,
     giroPinza: 0,
     separacionPinza: 15,
-    wireframe: false, animacion: () => {}};
+    wireframe: false,
+    animacion: () => tween1.start() };
+
+function updateArm(anim) {
+    robotControls.giroBase = anim.giroBase;
+    robotControls.giroBrazo = anim.giroBrazo;
+    robotControls.giroAntebrazoY = anim.giroAntebrazoY;
+    robotControls.giroAntebrazoZ = anim.giroAntebrazoZ;
+    robotControls.giroPinza = anim.giroPinza;
+    robotControls.separacionPinza = anim.separacionPinza;
+}
+
+let animationData = {giroBase: 0, giroBrazo: 0, giroAntebrazoY: 0, giroAntebrazoZ: 0, giroPinza: 0, separacionPinza: 15}
+
+const tween1 = new TWEEN.Tween(animationData)
+.to({...animationData, giroAntebrazoZ: -90}, 1000)
+.easing(TWEEN.Easing.Quadratic.Out)
+.onUpdate(() => {updateArm(animationData)})
+
+const tween2 = new TWEEN.Tween(animationData)
+.to({...animationData, separacionPinza: 4, giroAntebrazoZ: -90}, 500)
+.easing(TWEEN.Easing.Quadratic.Out)
+.onUpdate(() => {updateArm(animationData)})
+
+const tween3 = new TWEEN.Tween(animationData)
+.to({...animationData, separacionPinza: 4, giroAntebrazoZ: -45}, 500)
+.easing(TWEEN.Easing.Quadratic.Out)
+.onUpdate(() => {updateArm(animationData)})
+
+const tween4 = new TWEEN.Tween(animationData)
+.to({...animationData, separacionPinza: 4, giroAntebrazoZ: -45, giroBase: -180}, 1000)
+.easing(TWEEN.Easing.Quadratic.Out)
+.onUpdate(() => {updateArm(animationData)})
+
+const tween5 = new TWEEN.Tween(animationData)
+.to({...animationData, separacionPinza: 4, giroAntebrazoZ: -90, giroBase: -180}, 500)
+.easing(TWEEN.Easing.Quadratic.Out)
+.onUpdate(() => {updateArm(animationData)})
+
+const tween6 = new TWEEN.Tween(animationData)
+.to({...animationData, separacionPinza: 15, giroAntebrazoZ: -90, giroBase: -180}, 500)
+.easing(TWEEN.Easing.Quadratic.Out)
+.onUpdate(() => {updateArm(animationData)})
+
+const tween7 = new TWEEN.Tween(animationData)
+.to({...animationData}, 1000)
+.easing(TWEEN.Easing.Quadratic.Out)
+.onUpdate(() => {updateArm(animationData)})
+
+tween1.chain(tween2);
+tween2.chain(tween3);
+tween3.chain(tween4);
+tween4.chain(tween5);
+tween5.chain(tween6);
+tween6.chain(tween7);
+
+
 
 // Camaras adicionales
 let minimap;
 const L = 100;
-
-// partes
-//TODO: esto me parece una chapuza, pero no se me ocurre otra forma de hacerlo
-let pinzaIzq, pinzaDer, mano, antebrazo, brazo, base;
-
 
 // Acciones
 init()
@@ -45,9 +98,11 @@ initGui()
 function init() {
     // Motor de render
     renderer = new THREE.WebGLRenderer();
+    renderer.antialias = true;
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.getElementById('container').appendChild(renderer.domElement);
     renderer.setClearColor(new THREE.Color(0,0,0.7));
+    renderer.shadowMap.enabled = true;
     renderer.autoClear = false; 
 
     // Escena
@@ -74,16 +129,16 @@ function onKeyDown(event) {
     // move robot with arrows
     switch (event.key) {
         case "ArrowLeft":
-            robot.position.x -= 10;
+            robot.position.x -= 3;
             break;
         case "ArrowRight":
-            robot.position.x += 10;
+            robot.position.x += 3;
             break;
         case "ArrowUp":
-            robot.position.z -= 10;
+            robot.position.z -= 3;
             break;
         case "ArrowDown":
-            robot.position.z += 10;
+            robot.position.z += 3;
             break;
     }
 }
@@ -94,37 +149,40 @@ function initGui() {
     
     const robotFolder  = gui.addFolder("Control robot");
     robotFolder.add(robotControls, "giroBase", -180, 180, 1).name("Giro Base")
-        .onChange((value) => robot.rotation.y = value * (Math.PI / 180));
+        .onChange((value) => robotControls.giroBase = value).listen();
 
     robotFolder.add(robotControls, "giroBrazo", -45, 45, 1).name("Giro Brazo")
-        .onChange((value) => brazo.rotation.z = value * (Math.PI / 180));
+        .onChange((value) => robotControls.giroBrazo = value).listen();
 
     robotFolder.add(robotControls, "giroAntebrazoY", -180, 180, 1).name("Giro Antebrazo Y")
-        .onChange((value) => antebrazo.rotation.y = value * (Math.PI / 180));
+        .onChange((value) => robotControls.giroAntebrazoY = value).listen();
 
     robotFolder.add(robotControls, "giroAntebrazoZ", -90, 90, 1).name("Giro Antebrazo Z")
-        .onChange((value) => antebrazo.rotation.z = value * (Math.PI / 180));
+        .onChange((value) => robotControls.giroAntebrazoZ = value).listen();
 
     robotFolder.add(robotControls, "giroPinza", -40, 220, 1).name("Giro Pinza")
-        .onChange((value) => mano.rotation.z = value * (Math.PI / 180));
+        .onChange((value) => robotControls.giroPinza = value).listen();
 
     robotFolder.add(robotControls, "separacionPinza", 0, 15, 1).name("Separacion Pinza")
-        .onChange((value) => {
-            pinzaIzq.position.z = value;
-            pinzaDer.position.z = -value;
-        });
+        .onChange((value) => { robotControls.separacionPinza = value; }).listen();
 
     robotFolder.add(robotControls, "wireframe").name("Wireframe")
-        .onChange((value) => material.wireframe = value);
+        .onChange((value) => {
+            scene.traverseVisible(function(obj) {
+                if (obj instanceof THREE.Mesh) {
+                    obj.material.wireframe = value;
+                }
+            });
+        });
 
-    robotFolder.add(robotControls, "animacion").name("Animacion");
+    robotFolder.add(robotControls, "animacion").name("Animacion")
     
 }
 
 function setMinimapCamera() {
-    //TODO: por que el brazo en mi camara apunta hacia la derecha??
     minimap = new THREE.OrthographicCamera(-L, L, L, -L, -1, 1000);
     minimap.position.set(0, 300, 0);
+    minimap.up = new THREE.Vector3(1, 0, 0);
     minimap.lookAt(0, 0, 0);
 }
 
@@ -137,14 +195,13 @@ function updateAspectRatio(){
 }
 
 function loadScene() {
-    material = new THREE.MeshNormalMaterial();
-    // new THREE.MeshBasicMaterial({color: 'red', wireframe: true});
+    const normalMaterial = new THREE.MeshNormalMaterial();
 
     //PINZA
     const pinza = new THREE.Object3D();
     //TODO: crear geometria correctamente
 
-    const f1 = new THREE.Mesh(new THREE.BoxGeometry(19, 20, 4), material)
+    const f1 = new THREE.Mesh(new THREE.BoxGeometry(19, 20, 4), normalMaterial)
     f1.position.set(9.5, 0, 0);
     pinza.add(f1);
 
@@ -196,9 +253,57 @@ function loadScene() {
         9.0,  6.0,  -2.0,
     ] );
 
+    const uvs = new Float32Array( [
+        // outer
+        0.0, 0.0,
+        0.0, 1.0, 
+        1.0, 0.0, 
+    
+        0.0, 1.0,
+        1.0, 1.0,
+        1.0, 0.0, 
+
+        // inner
+        0.0, 1.0, 
+        0.0, 0.0, 
+        1.0, 0.0, 
+
+        1.0, 0.0,
+        1.0, 1.0,
+        0.0, 1.0,
+
+        // top
+        0.0, 0.0,
+        0.0, 1.0,
+        1.0, 1.0,
+
+        1.0, 1.0,
+        1.0, 0.0,
+        0.0, 0.0,
+
+        // bottom
+        0.0, 0.0,
+        0.0, 1.0,
+        1.0, 1.0,
+        
+        1.0, 1.0,
+        1.0, 0.0,
+        0.0, 0.0,
+
+        // front
+        0.0, 0.0,
+        0.0, 1.0,
+        1.0, 1.0,
+
+        1.0, 1.0,
+        1.0, 0.0,
+        0.0, 0.0,
+    ] )
+
     geometry.setAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
     geometry.computeVertexNormals();
-    const f2 = new THREE.Mesh(geometry, material);
+    geometry.setAttribute( 'uv', new THREE.BufferAttribute( uvs, 2 ) );
+    const f2 = new THREE.Mesh(geometry, normalMaterial);
     f2.position.set(19 + 9, 0, 0);
     pinza.add(f2);
 
@@ -206,17 +311,17 @@ function loadScene() {
     // MANO
     mano = new THREE.Object3D();
 
-    const palma = new THREE.Mesh(new THREE.CylinderGeometry(15, 15, 40, 10), material);
+    const palma = new THREE.Mesh(new THREE.CylinderGeometry(15, 15, 40, 10), normalMaterial);
     palma.rotation.x = Math.PI / 2;
     mano.add(palma);
 
     pinzaIzq = pinza.clone();
-    pinzaIzq.position.set(0, 0, 15);
+    pinzaIzq.position.set(0, 0, 17);
     mano.add(pinzaIzq);
     
     pinzaDer = pinza.clone();
     pinzaDer.scale.z = -1;
-    pinzaDer.position.set(0, 0, -15);
+    pinzaDer.position.set(0, 0, -17);
     mano.add(pinzaDer);
 
     mano.position.set(0, 80, 0);
@@ -225,22 +330,22 @@ function loadScene() {
     // ANTEBRAZO
     antebrazo = new THREE.Object3D();
     
-    const disco = new THREE.Mesh(new THREE.CylinderGeometry(22, 22, 6, 15), material);
+    const disco = new THREE.Mesh(new THREE.CylinderGeometry(22, 22, 6, 15), normalMaterial);
     antebrazo.add(disco);
 
-    const nervio1 = new THREE.Mesh(new THREE.BoxGeometry(4, 80, 4), material);
+    const nervio1 = new THREE.Mesh(new THREE.BoxGeometry(4, 80, 4), normalMaterial);
     nervio1.position.set(8, 40, 8);
     antebrazo.add(nervio1);
 
-    const nervio2 = new THREE.Mesh(new THREE.BoxGeometry(4, 80, 4), material);
+    const nervio2 = new THREE.Mesh(new THREE.BoxGeometry(4, 80, 4), normalMaterial);
     nervio2.position.set(-8, 40, 8);
     antebrazo.add(nervio2);
 
-    const nervio3 = new THREE.Mesh(new THREE.BoxGeometry(4, 80, 4), material);
+    const nervio3 = new THREE.Mesh(new THREE.BoxGeometry(4, 80, 4), normalMaterial);
     nervio3.position.set(8, 40, -8);
     antebrazo.add(nervio3);
 
-    const nervio4 = new THREE.Mesh(new THREE.BoxGeometry(4, 80, 4), material);
+    const nervio4 = new THREE.Mesh(new THREE.BoxGeometry(4, 80, 4), normalMaterial);
     nervio4.position.set(-8, 40, -8);
     antebrazo.add(nervio4);
 
@@ -250,15 +355,15 @@ function loadScene() {
     // # BRAZO #
     brazo = new THREE.Object3D();
 
-    const eje = new THREE.Mesh(new THREE.CylinderGeometry(20, 20, 18, 10), material);
+    const eje = new THREE.Mesh(new THREE.CylinderGeometry(20, 20, 18, 10), normalMaterial);
     eje.rotation.x = Math.PI / 2;
     brazo.add(eje);
 
-    const esparrago = new THREE.Mesh(new THREE.BoxGeometry(18, 120, 12), material);
+    const esparrago = new THREE.Mesh(new THREE.BoxGeometry(18, 120, 12), normalMaterial);
     esparrago.position.set(0, 60, 0);
     brazo.add(esparrago);
 
-    const rotula = new THREE.Mesh(new THREE.SphereGeometry(20, 10, 10), material);
+    const rotula = new THREE.Mesh(new THREE.SphereGeometry(20, 10, 10), normalMaterial);
     rotula.position.set(0, 120, 0);
     brazo.add(rotula);
 
@@ -266,7 +371,7 @@ function loadScene() {
 
     // BASE
     base = new THREE.Object3D();
-    base.add(new THREE.Mesh(new THREE.CylinderGeometry(50, 50, 15, 20), material)); 
+    base.add(new THREE.Mesh(new THREE.CylinderGeometry(50, 50, 15, 20), normalMaterial));
     base.add(brazo);
     
     //ROBOT
@@ -274,9 +379,8 @@ function loadScene() {
     robot.add(base);
 
     // Suelo
-    const suelo = new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000, 10, 10), material);
+    const suelo = new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000, 10, 10), normalMaterial);
     suelo.rotation.x = -Math.PI / 2;
-    
     scene.add(suelo);
     scene.add(new THREE.AxesHelper(3));
     scene.add(robot);
@@ -284,6 +388,15 @@ function loadScene() {
 
 
 function update() {
+    robot.rotation.y = robotControls.giroBase * (Math.PI / 180);
+    brazo.rotation.z = robotControls.giroBrazo * (Math.PI / 180);
+    antebrazo.rotation.y = robotControls.giroAntebrazoY * (Math.PI / 180);
+    antebrazo.rotation.z = robotControls.giroAntebrazoZ * (Math.PI / 180);
+    mano.rotation.z = robotControls.giroPinza * (Math.PI / 180);
+    pinzaIzq.position.z = robotControls.separacionPinza + 2;
+    pinzaDer.position.z = -robotControls.separacionPinza - 2;
+
+    TWEEN.update();
 }
 
 
